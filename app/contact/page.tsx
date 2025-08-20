@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
+import { useState } from "react"
+import emailjs from "emailjs-com"
 
 const fadeInUp = {
   initial: { opacity: 0, y: 60 },
@@ -17,6 +19,65 @@ const fadeInUp = {
 }
 
 export default function ContactPage() {
+
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    company: "",
+    subject: "",
+    message: ""
+  })
+
+  const [loading, setLoading] = useState(false)
+
+  const handleChange = (e:any) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value })
+  }
+
+  const sendEmail = (e:any) => {
+    e.preventDefault()
+    setLoading(true)
+
+    const templateParams = {
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      email: formData.email,
+      company: formData.company,
+      subject: formData.subject,
+      message: formData.message
+    }
+   
+    console.log(templateParams)
+    emailjs
+      .send(
+        "service_aryehbk",     // Replace with your EmailJS Service ID
+        "template_waft4de",    // Replace with your EmailJS Template ID
+        templateParams,
+        "mErTrlBsKWueIkOZ5"      // Replace with your EmailJS Public Key
+      )
+      .then(
+        (result) => {
+          alert("Message sent successfully!")
+          setFormData({
+            firstName: "",
+            lastName: "",
+            email: "",
+            company: "",
+            subject: "",
+            message: ""
+          })
+        },
+        (error) => {
+          alert("Failed to send message. Please try again.")
+          console.error(error)
+        }
+      )
+      .finally(() => setLoading(false))
+  }
+
+
+  
   const contactInfo = [
     {
       icon: Mail,
@@ -81,6 +142,7 @@ export default function ContactPage() {
                   <p className="text-slate-300">Fill out the form below and we'll get back to you within 24 hours.</p>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                  <form onSubmit={sendEmail} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="firstName" className="text-white">
@@ -88,6 +150,7 @@ export default function ContactPage() {
                       </Label>
                       <Input
                         id="firstName"
+                        value={formData.firstName} onChange={handleChange}
                         placeholder="John"
                         className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
                       />
@@ -99,6 +162,7 @@ export default function ContactPage() {
                       <Input
                         id="lastName"
                         placeholder="Doe"
+                        value={formData.lastName} onChange={handleChange}
                         className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
                       />
                     </div>
@@ -111,6 +175,7 @@ export default function ContactPage() {
                     <Input
                       id="email"
                       type="email"
+                      value={formData.email} onChange={handleChange}
                       placeholder="john@example.com"
                       className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
                     />
@@ -123,6 +188,7 @@ export default function ContactPage() {
                     <Input
                       id="company"
                       placeholder="Your Company"
+                      value={formData.company} onChange={handleChange}
                       className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
                     />
                   </div>
@@ -134,6 +200,7 @@ export default function ContactPage() {
                     <Input
                       id="subject"
                       placeholder="How can we help you?"
+                      value={formData.subject} onChange={handleChange}
                       className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
                     />
                   </div>
@@ -145,15 +212,17 @@ export default function ContactPage() {
                     <Textarea
                       id="message"
                       placeholder="Tell us about your project or question..."
+                      value={formData.message} onChange={handleChange}
                       rows={5}
                       className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
                     />
                   </div>
 
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
                     <Send className="h-4 w-4 mr-2" />
                     Send Message
                   </Button>
+                    </form>
                 </CardContent>
               </Card>
             </motion.div>
